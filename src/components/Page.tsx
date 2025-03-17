@@ -6,13 +6,24 @@ import { format } from 'date-fns';
 import 'mathquill/build/mathquill.css';
 
 // Create a global MathQuill instance for static rendering
-// Using dynamic import to avoid "require is not defined" error
+// Using a specific approach for Vite to avoid module resolution issues
 let MQ: any;
 if (typeof window !== 'undefined') {
-  // Using a dynamic import approach instead of require
-  import('mathquill').then((MathQuill) => {
-    MQ = MathQuill.getInterface(2);
-  });
+  // We need to use a direct reference to the global MathQuill object
+  // that gets added by the CSS import
+  setTimeout(() => {
+    // The setTimeout allows the mathquill scripts to load properly
+    if (window.MathQuill) {
+      MQ = window.MathQuill.getInterface(2);
+    }
+  }, 100);
+}
+
+// Add MathQuill to the Window interface
+declare global {
+  interface Window {
+    MathQuill: any;
+  }
 }
 
 interface PageProps {
@@ -72,10 +83,16 @@ const Page: React.FC<PageProps> = ({
         // Use effect to render LaTeX after component mounts
         React.useEffect(() => {
           if (containerRef.current && MQ) {
-            // Clear previous content
-            containerRef.current.innerHTML = '';
-            // Render static math
-            MQ.StaticMath(containerRef.current).latex(latex);
+            try {
+              // Clear previous content
+              containerRef.current.innerHTML = '';
+              // Render static math
+              MQ.StaticMath(containerRef.current).latex(latex);
+            } catch (error) {
+              console.error('Error rendering math:', error);
+              // Fallback if MathQuill fails
+              containerRef.current.textContent = latex;
+            }
           }
         }, [latex]);
         
