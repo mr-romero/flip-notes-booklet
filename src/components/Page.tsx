@@ -3,6 +3,14 @@ import React from 'react';
 import { Note } from './Booklet';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import 'mathquill/build/mathquill.css';
+
+// Create a global MathQuill instance for static rendering
+let MQ: any;
+if (typeof window !== 'undefined') {
+  const MathQuill = require('mathquill');
+  MQ = MathQuill.getInterface(2);
+}
 
 interface PageProps {
   note: Note;
@@ -44,6 +52,38 @@ const Page: React.FC<PageProps> = ({
     }
   };
 
+  // Function to render text with math formulas
+  const renderContentWithMath = (content: string) => {
+    // Split content by the math delimiters ($)
+    const parts = content.split(/(\$[^$]+\$)/g);
+    
+    return parts.map((part, index) => {
+      // Check if this part is a math formula (surrounded by $)
+      if (part.startsWith('$') && part.endsWith('$')) {
+        // Extract the LaTeX without the $ delimiters
+        const latex = part.slice(1, -1);
+        
+        // Create a container ref to render the math
+        const containerRef = React.useRef<HTMLSpanElement>(null);
+        
+        // Use effect to render LaTeX after component mounts
+        React.useEffect(() => {
+          if (containerRef.current && MQ) {
+            // Clear previous content
+            containerRef.current.innerHTML = '';
+            // Render static math
+            MQ.StaticMath(containerRef.current).latex(latex);
+          }
+        }, [latex]);
+        
+        return <span key={index} ref={containerRef} className="inline-block mx-1"></span>;
+      }
+      
+      // Regular text
+      return <React.Fragment key={index}>{part}</React.Fragment>;
+    });
+  };
+
   return (
     <div
       className={cn(
@@ -65,7 +105,7 @@ const Page: React.FC<PageProps> = ({
           
           <div className="flex-grow overflow-auto prose prose-sm max-w-none">
             {note.content.split('\n\n').map((paragraph, i) => (
-              <p key={i} className="mb-4">{paragraph}</p>
+              <p key={i} className="mb-4">{renderContentWithMath(paragraph)}</p>
             ))}
           </div>
           
