@@ -1,15 +1,18 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Note } from './Booklet';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import 'mathquill/build/mathquill.css';
 
 // Create a global MathQuill instance for static rendering
+// Using dynamic import to avoid "require is not defined" error
 let MQ: any;
 if (typeof window !== 'undefined') {
-  const MathQuill = require('mathquill');
-  MQ = MathQuill.getInterface(2);
+  // Using a dynamic import approach instead of require
+  import('mathquill').then((MathQuill) => {
+    MQ = MathQuill.getInterface(2);
+  });
 }
 
 interface PageProps {

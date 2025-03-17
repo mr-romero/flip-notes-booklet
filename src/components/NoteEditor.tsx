@@ -141,7 +141,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
                 />
               </div>
               <p className="text-xs text-muted-foreground mb-2">
-                Examples: x^2 + y^2 = z^2, \frac{a}{b}, \sqrt{x}, \int_{a}^{b}
+                Examples: "x^2 + y^2 = z^2", "\frac{a}{b}", "\sqrt{x}", "\int_{a}^{b}"
               </p>
               <div className="flex justify-end">
                 <Button
