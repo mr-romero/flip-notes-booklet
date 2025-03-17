@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
+				serif: ['Georgia', 'serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,6 +66,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				paper: {
+					DEFAULT: '#f8f5f0',
+					dark: '#f1ede5',
+				},
+				book: {
+					spine: '#e0dad0',
+					cover: '#d8d0c5',
+					shadow: 'rgba(0, 0, 0, 0.1)',
 				}
 			},
 			borderRadius: {
@@ -84,12 +98,59 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'page-turn-right': {
+					'0%': {
+						transform: 'rotateY(0deg)',
+						transformOrigin: 'left',
+						zIndex: '10',
+					},
+					'100%': {
+						transform: 'rotateY(-180deg)',
+						transformOrigin: 'left',
+						zIndex: '10',
+					}
+				},
+				'page-turn-left': {
+					'0%': {
+						transform: 'rotateY(-180deg)',
+						transformOrigin: 'left',
+						zIndex: '10',
+					},
+					'100%': {
+						transform: 'rotateY(0deg)',
+						transformOrigin: 'left',
+						zIndex: '10',
+					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
+				},
+				'fade-out': {
+					'0%': { opacity: '1' },
+					'100%': { opacity: '0' }
+				},
+				'slide-up': {
+					'0%': { transform: 'translateY(10px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'page-turn-right': 'page-turn-right 0.6s ease-in-out forwards',
+				'page-turn-left': 'page-turn-left 0.6s ease-in-out forwards',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'fade-out': 'fade-out 0.3s ease-out',
+				'slide-up': 'slide-up 0.3s ease-out'
+			},
+			boxShadow: {
+				'page': '0 0 15px rgba(0, 0, 0, 0.05)',
+				'book': '0 10px 30px rgba(0, 0, 0, 0.1)',
+				'page-right': '-5px 0 15px rgba(0, 0, 0, 0.1)',
+				'page-fold': 'inset -7px 0 15px -5px rgba(0, 0, 0, 0.1)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
