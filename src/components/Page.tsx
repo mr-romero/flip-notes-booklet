@@ -26,11 +26,11 @@ const Page: React.FC<PageProps> = ({
     if (!isFlipping) return '';
     
     if (flipDirection === 'right' && isLeftPage) {
-      return 'animate-page-turn-right';
+      return 'animate-page-flip-right';
     }
     
     if (flipDirection === 'left' && isRightPage) {
-      return 'animate-page-turn-left';
+      return 'animate-page-flip-left';
     }
     
     return '';
@@ -47,14 +47,14 @@ const Page: React.FC<PageProps> = ({
   return (
     <div
       className={cn(
-        "absolute inset-0 w-full h-full",
+        "absolute inset-0 w-full h-full perspective-1000",
         getAnimationClass(),
         isLeftPage ? "z-20" : "z-10"
       )}
     >
       {/* Front of page (visible when on left side) */}
       <div className={cn(
-        "absolute inset-0 bg-paper p-8 shadow-page page-content",
+        "absolute inset-0 bg-paper p-8 shadow-page page-content backface-hidden",
         isLeftPage ? "shadow-page-fold" : ""
       )}>
         <div className="h-full flex flex-col">
@@ -77,7 +77,7 @@ const Page: React.FC<PageProps> = ({
       
       {/* Back of page (visible when on right side) */}
       <div className={cn(
-        "absolute inset-0 bg-paper-dark p-8 shadow-page page-back",
+        "absolute inset-0 bg-paper-dark p-8 shadow-page page-back backface-hidden rotate-y-180",
         isRightPage ? "" : "hidden"
       )}>
         <div className="h-full flex flex-col justify-between">
