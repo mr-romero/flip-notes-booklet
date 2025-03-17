@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    // Add this to fix the "global is not defined" error
-    global: {},
+    // Fix "global is not defined" error from react-mathquill
+    global: "window",
   },
 }));

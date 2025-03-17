@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +45,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
   const { toast } = useToast();
 
   // Initialize the math field when it's shown
-  React.useEffect(() => {
+  useEffect(() => {
     if (showMathEditor && mathFieldRef.current && MQ) {
       try {
         const mathField = MQ.MathField(mathFieldRef.current, {
@@ -64,7 +64,47 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
         console.error('Error initializing MathField:', error);
       }
     }
-  }, [showMathEditor, mathFieldRef.current, MQ]);
+  }, [showMathEditor, latexInput]);
+
+  // Process content when it changes to convert custom LaTeX syntax
+  useEffect(() => {
+    if (textareaRef.current) {
+      const textarea = textareaRef.current;
+      const cursorPosition = textarea.selectionStart;
+      
+      // Check if we should process LaTeX
+      const latexRegex = /latexherelike=(.*?)=/g;
+      let match;
+      let processedContent = content;
+      let modified = false;
+      
+      // Create a new string with all matches replaced
+      while ((match = latexRegex.exec(content)) !== null) {
+        const fullMatch = match[0]; // The entire match including delimiters
+        const latexContent = match[1]; // Just the LaTeX content
+        const replacement = `$${latexContent}$`; // Format for MathQuill rendering
+        
+        processedContent = processedContent.replace(fullMatch, replacement);
+        modified = true;
+      }
+      
+      // Only update if we made changes
+      if (modified) {
+        setContent(processedContent);
+        
+        // Try to restore cursor position accounting for replacement
+        setTimeout(() => {
+          if (textareaRef.current) {
+            // Adjust cursor position based on change in length
+            const newCursorPosition = Math.max(0, cursorPosition - 
+              (content.length - processedContent.length));
+            textareaRef.current.selectionStart = newCursorPosition;
+            textareaRef.current.selectionEnd = newCursorPosition;
+          }
+        }, 0);
+      }
+    }
+  }, [content]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -202,7 +242,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
             className="min-h-[300px] border-primary/20 focus:border-primary/60"
           />
           <p className="text-xs text-muted-foreground">
-            Use double line breaks for new paragraphs. Wrap math formulas in $ symbols.
+            Type <code>latexherelike=your_latex_formula=</code> to insert math formulas directly.
+            Example: <code>latexherelike=x^2 + y^2 = z^2=</code>
           </p>
         </div>
         
