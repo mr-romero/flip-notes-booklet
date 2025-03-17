@@ -6,8 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Note } from './Booklet';
-import { EditableMathField } from 'react-mathquill';
 import 'mathquill/build/mathquill.css';
+
+// MathQuill setup using the global window object
+let MQ: any;
+if (typeof window !== 'undefined') {
+  // Access MathQuill through the global window object
+  setTimeout(() => {
+    if (window.MathQuill) {
+      MQ = window.MathQuill.getInterface(2);
+    }
+  }, 100);
+}
+
+// Add MathQuill to the Window interface
+declare global {
+  interface Window {
+    MathQuill: any;
+  }
+}
 
 interface NoteEditorProps {
   onSaveNote: (note: Omit<Note, 'id'>) => void;
@@ -23,8 +40,31 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
   const [showMathEditor, setShowMathEditor] = useState(false);
   const [latexInput, setLatexInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mathFieldRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Initialize the math field when it's shown
+  React.useEffect(() => {
+    if (showMathEditor && mathFieldRef.current && MQ) {
+      try {
+        const mathField = MQ.MathField(mathFieldRef.current, {
+          handlers: {
+            edit: (mathField: any) => {
+              setLatexInput(mathField.latex());
+            }
+          }
+        });
+        
+        // Set initial value if there is one
+        if (latexInput) {
+          mathField.latex(latexInput);
+        }
+      } catch (error) {
+        console.error('Error initializing MathField:', error);
+      }
+    }
+  }, [showMathEditor, mathFieldRef.current, MQ]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,16 +172,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
             <div className="p-3 border rounded-md bg-background mb-3">
               <p className="text-sm mb-2 font-medium">Enter LaTeX Formula:</p>
               <div className="mb-3">
-                <EditableMathField
-                  latex={latexInput}
-                  onChange={(mathField) => {
-                    setLatexInput(mathField.latex());
-                  }}
-                  className="w-full p-2 border rounded"
+                <div
+                  ref={mathFieldRef}
+                  className="w-full p-2 border rounded mathquill-editor"
                 />
               </div>
               <p className="text-xs text-muted-foreground mb-2">
-                Examples: "x^2 + y^2 = z^2", "\frac{a}{b}", "\sqrt{x}", "\int_{a}^{b}"
+                Examples: "x^2 + y^2 = z^2", "\frac{1}{2}", "\sqrt{x}", "\int_{0}^{1}"
               </p>
               <div className="flex justify-end">
                 <Button
